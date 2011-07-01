@@ -141,7 +141,7 @@ Ext.define('Docs.controller.Classes', {
             if (this.getTabPanel()) {
                 this.getTabPanel().setLoading(true);
             }
-
+            
             Ext.data.JsonP.request({
                 url: this.getBaseUrl() + '/output/' + cls + '.js',
                 callbackName: cls.replace(/\./g, '_'),
@@ -189,7 +189,7 @@ Ext.define('Docs.controller.Classes', {
 
     showGuide: function(name, noHistory) {
         noHistory || Docs.History.push("/guide/" + name);
-
+        
         Ext.data.JsonP.request({
             url: this.getBaseUrl() + "/guides/" + name + "/README.js",
             callbackName: name,
@@ -208,7 +208,7 @@ Ext.define('Docs.controller.Classes', {
      * @return {String} URL
      */
     getBaseUrl: function() {
-        return document.location.href.replace(/#.*/, "").replace(/index.html/, "");
+        return document.location.href.replace(/#.*/, "").replace(/index.html/, "").replace(/\/$/,"");
     }
 
 });
