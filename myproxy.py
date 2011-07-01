@@ -1,17 +1,24 @@
+from middleman import Store
 from twisted.web import proxy, http
+from twisted.python.rebuild import Sensitive
 
 class MyProxyClient(proxy.ProxyClient):
-    pass
+    myStore = Store()
+    def __init__(self, command, rest, version, headers, data, father):
+        proxy.ProxyClient.__init__(self, command, rest, version, headers, data, father)
+        self.myStore.addHost(headers['host'], command, rest, headers, data)
+        
+
  
 class MyProxyClientFactory(proxy.ProxyClientFactory):
     protocol = MyProxyClient
     pass
 
-class MyProxyRequest(proxy.ProxyRequest):
+class MyProxyRequest(proxy.ProxyRequest, Sensitive):
     protocols = {'http': MyProxyClientFactory}
     
  
-class MyProxy(proxy.Proxy):
+class MyProxy(proxy.Proxy, Sensitive):
     """
     This class implements a simple web proxy.
 
@@ -28,5 +35,5 @@ class MyProxy(proxy.Proxy):
 
     requestFactory = MyProxyRequest
  
-class ProxyFactory(http.HTTPFactory):
+class ProxyFactory(http.HTTPFactory, Sensitive):
     protocol = MyProxy

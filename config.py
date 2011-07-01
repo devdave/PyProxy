@@ -3,7 +3,7 @@
 Config = {
     "web": {
         "root": "htdocs"
-        , "elements": ["css","extjs", "imgs", "js", "media", 'app']
+        , "elements": ["css","extjs", "imgs", "js", "media", 'webapp']
         , "port": 80
     }
     , "proxy": {

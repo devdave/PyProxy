@@ -1,4 +1,14 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <!-- Komodo Project File - DO NOT EDIT -->
 <project id="c658dc71-33d3-4ab4-ba7c-f39f46d968c1" kpf_version="5" name="PyProxy.komodoproject">
+<livefolder id="53a407bd-dbfb-48fb-b40d-dbf5568067cf" idref="c658dc71-33d3-4ab4-ba7c-f39f46d968c1" name="controllers" url="weblib/controllers">
+</livefolder>
+<livefolder id="b50ac81d-2d42-408e-99b3-48abb9ac3244" idref="c658dc71-33d3-4ab4-ba7c-f39f46d968c1" name="webapp" url="htdocs/webapp">
+</livefolder>
+<preference-set idref="c658dc71-33d3-4ab4-ba7c-f39f46d968c1">
+  <string relative="path" id="import_dirname"></string>
+  <string id="import_exclude_matches">*.*~;*.bak;*.tmp;CVS;.#*;*.pyo;*.pyc;.svn;_svn;*%25*;tmp*.html;.DS_Store</string>
+  <string id="import_include_matches"></string>
+  <string relative="path" id="javascriptExtraPaths">htdocs/extjs/src</string>
+</preference-set>
 </project>
