@@ -20,16 +20,17 @@ class Simple(Controller):
             
         
         
-        
+    @jsonify    
     def do_describe(self, request):
         host = request.args.get('host', [""])[0]
-        return dumps(self.myStore.data.get(host, None))
-        
+        return self.myStore.data.get(host, None)        
+    
+    @jsonify    
     def do_digest(self, request):
         host = request.args.get('host', [""])[0]
         uri = request.args.get("uri", [""])[0]
         hostURIs = self.myStore.data.get(host, None)
         data = hostURIs[uri] if hostURIs else None        
-        return dumps(data)
+        return data
 
     
