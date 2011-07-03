@@ -1,5 +1,5 @@
 
-from types import 
+
 from functools import wraps
 from twisted.web import (server, resource, static,  html )
 
