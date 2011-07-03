@@ -12,38 +12,32 @@
         //@todo find a better way
         this.tmpl = tmpl("main_hostCountRow");
         var priv = {
-            pollIntervalHandle: null
-            , succeedOnce: false
+            pollHandle: null
+            , isPolling: false
+            , storeTS: 0
             , pollHosts: function(){
-                $.ajax("/simple/host_count", {dataType: "json"})
+                if(priv.isPolling){
+                    return;
+                }
+                priv.isPolling = true;
+                
+                priv.pollHandle = $.ajax("/simple/host_count", {dataType: "json", data: {"ts": priv.storeTS } } )
                     .success(function(response){
                         if(response.success){
+                            priv.ts = response.ts;
                             self.tbody.empty();                            
                             for(i = 0; i < response.hosts.length; i++){
                                 self.tbody.append(self.tmpl(response.hosts[i]));
                             }
                         }
+                    })
+                    .complete(function(response){
+                        priv.isPolling = false;
+                        priv.pollHosts();
                     });
             }
         }
         
-        /**
-        *@argument {integer} delay Microsend interval to poll server for new hosts data
-        */            
-        this.poll = function(delay){
-            if(priv.pollIntervalHandle != null){
-                clearInterval(priv.pollIntervalHandle);
-                priv.pollIntervalHandle = null;
-            }
-            
-            priv.pollIntervalHandle = setInterval(priv.pollHosts, delay);
-            return true;
-        };
-        
-        this.haltPoll = function(){
-            clearInterval(priv.pollIntervalHandle);
-            priv.pollIntervalHandle = null;
-        }
         
         this.onHostClick = function(){
             var hostName = $(this).data("host");
@@ -53,7 +47,7 @@
         
         jQuery("a.hostClick").live("click", this.onHostClick);
         
-        this.poll(1500);
+        priv.pollHosts();
         
     }
     

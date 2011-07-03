@@ -13,15 +13,11 @@ def GetSite(Config):
         @docRoot the base for the static file content
     """
     root = resource.Resource()
-    #root.putChild("", static.File(join(Config['web']['root'], "webapp")))
+    root.putChild("", static.File(join(Config['web']['root'], "webapp", "index.html")))
     root.putChild("simple", Simple())
     
     for element in Config['web']['elements']:
-        #exists to evaluate wit dbgp for correctnesss, todo exists check as well
-        debugPath = join(Config['web']['root'], element)        
-        if not exists(debugPath):
-            mkdir(debugPath)        
-        root.putChild(element, static.File(debugPath))    
+        root.putChild(element, static.File(join(Config['web']['root'], element)))    
     
     return server.Site(root)
     
