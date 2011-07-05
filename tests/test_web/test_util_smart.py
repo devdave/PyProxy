@@ -52,7 +52,20 @@ class TestUtilSmartMust(unittest.TestCase):
         self.assertFalse(response['success'])
         self.assertEquals(response['reason'], "arg1 instanceof <type 'str'> is required")
         
-            
+    def testMustSucceedsWithListForArg1(self):
+        
+        @Must(arg1 = (list, float) )
+        def testMethod(request, params):
+            self.assertTrue('arg1' in params)
+            self.assertTrue(len(params['arg1']) == 2)
+            self.assertTrue(isinstance(params['arg1'][0], float))
+            pass
+        
+        request = DummyRequest([''])
+        request.addArg('arg1', ['123.5', '678.9'])
+        
+        response = testMethod(request)
+        
                     
 if __name__ == '__main__':
      unittest.main()

@@ -36,11 +36,16 @@ class Must(object):
             if name not in request.args:
                 missing.append( self.isMissing % ( name, "%s" % desired )  )
                 continue
-            rawValue = request.args[name]
+            
+            try:
+                rawValue = request.args[name][0]
+            except IndexError, e:
+                rawValue = request.args[name]
+                
             #if desired type is list, we're done here
             value = None
             if isinstance(desired, tuple):
-                base, ext = tuple
+                base, ext = desired
                 if base == list:
                     value = []
                     for rawElement in rawValue:
@@ -50,7 +55,7 @@ class Must(object):
                             badCast.append(self.badCast % ( 'string', rawElement, ext ))
             else:
                 try:
-                    value = desired(rawValue[0])
+                    value = desired(rawValue)
                 except TypeError, e:
                     badCast.append(self.badCast % ( 'string', rawValue, ext ))
            

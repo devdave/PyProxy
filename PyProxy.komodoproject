@@ -10,7 +10,7 @@
   <string id="import_exclude_matches">*.*~;*.bak;*.tmp;CVS;.#*;*.pyo;*.pyc;.svn;_svn;*%25*;tmp*.html;.DS_Store</string>
   <string id="import_include_matches"></string>
   <string relative="path" id="javascriptExtraPaths">htdocs/extjs/src</string>
-  <string id="pythonExtraPaths">D:\projects\pyproxy;C:\Python26\Lib\site-packages\twisted</string>
+  <string id="pythonExtraPaths">C:\Python26\Lib\site-packages\twisted;C:\Users\dward\Documents\pyprojects\PyProxy</string>
 <preference-set id="testPlans">
 <preference-set id="PyProxy.komodoproject - test Controllers">
   <string id="command_line"></string>
