@@ -29,10 +29,9 @@ class Must(object):
         self.isMissing = expected.pop('_isMissing', "%s instanceof %s is required")
         self.expectations = expected
     
-    def parseRequestArgs(self, request):
+    def parseRequestArgs(self, request, params = {}):
         missing = []
         badCast = []
-        params = {}
         for name, desired in self.expectations.items():
             if name not in request.args:
                 missing.append( self.isMissing % ( name, "%s" % desired )  )
@@ -40,9 +39,6 @@ class Must(object):
             rawValue = request.args[name]
             #if desired type is list, we're done here
             value = None
-            if isinstance(rawValue, desired):
-                value = rawValue
-            #instead of type checking, should probably do capability testing
             if isinstance(desired, tuple):
                 base, ext = tuple
                 if base == list:
@@ -51,12 +47,12 @@ class Must(object):
                         try:
                             value.append(ext(rawElement))
                         except TypeError, e:
-                            badCast.append(self.badCast % ( 'string', rawElement, ext )
+                            badCast.append(self.badCast % ( 'string', rawElement, ext ))
             else:
                 try:
-                    value.append(ext(rawValue))
+                    value = desired(rawValue[0])
                 except TypeError, e:
-                    badCast.append(self.badCast % ( 'string', rawValue, ext )
+                    badCast.append(self.badCast % ( 'string', rawValue, ext ))
            
             params[name] = value
             
@@ -67,37 +63,47 @@ class Must(object):
     
             
         @wraps(host)
-        def wrapper(request)
-            params, missing, badCast = self.parseRequest(request)
+        def wrapper(request, params = {}):
+            params, missing, badCast = self.parseRequestArgs(request, params)
             success = True
             reason = ""
             if len(missing) > 0:
                 success = False
                 reason += "; ".join(missing)
             if len(badCast) > 0:
-                success = False:
+                success = False
                 reason += "; ".join(badCast)
                 
-            if success:
-                return host
-            else:
-                return dict(success = success, reason = reason)
-        
+            return host(request, params) if success else dict(success = success, reason = reason)
+            
         return wrapper
 
        
-class Can(object):
+class Can(Must):
     """
         Similar to classs Must except if missing, it doesn't
         shortcircuit.  If it fails to cast, then it will error out
     """        
-            
+    def __call__(self, host):
 
+        
+        @wraps(host)
+        def wrapper(request, params = {}):
+            params, missing, badCast = self.parseRequestArgs(request, params)
+            success = True
+            return dumps(dict(success = success, reason = reason))
+                
+        
+        return wrapper
+    
+    
 def isPOST(f):
-    return RequestTypes.POST
+    f.type = RequestTypes.POST
+    return f
     
 def isGET(f):
-    return RequestTypes.GET
+    f.type = RequestTypes.GET
+    return f
 
 
 class Controller(resource.Resource):

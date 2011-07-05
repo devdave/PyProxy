@@ -1,7 +1,7 @@
 from twisted.web.server import NOT_DONE_YET
 from twisted.internet.defer import Deferred
 
-from web.util.smart import (Controller )
+from web.util.smart import (Controller, Must, Can )
 from web.util.utilities import jsonify
 from json import dumps
 from data.store import Store
@@ -11,8 +11,8 @@ class Simple(Controller):
     myStore = Store()
     isLeaf = True
     
-    
-    def process_host_count(self, request):
+    @jsonify
+    def process_host_count(self, request, params):
         try:
             data = self.myStore.getHostCount()
         except Exception, e:
@@ -20,13 +20,14 @@ class Simple(Controller):
         else:
             response = dict(success = True, ts = self.myStore.lastChange,  hosts = data)
 
-        request.write(dumps(response))
-        request.finish();
-        return
+        return response
         
     
-
-    def do_host_count(self, request):
+    
+    
+    
+    @Can(ts = float)
+    def do_host_count(self, request, params = {}):
         """
             Because process_host_count above is meant to handle its
             own finalization, do_host_count always returns NOT_DONE_YET.  Its
@@ -35,20 +36,24 @@ class Simple(Controller):
         """
         
         #if this a polling request and it's not the first one
-        if 'ts' in request.args and request.args['ts'][0] != '0':
+        if 'ts' in params and params['ts'] != 0:
             #if the caller is up to date or from the future
-            if float(request.args['ts'][0]) >= self.myStore.lastChange:
+            if params['ts'] > self.myStore.lastChange:
                 #hold the connection open
                 d = Deferred()
+                def deferred_host_count(self, request):
+                    request.write(self.process_host_count)
+                    request.finish()
+                
                 #and notify them when something changes
-                d.addCallback(self.process_host_count, request)
+                d.addCallback(self.deferred_host_count, request)
                 self.myStore.onChange.observe(d)
                 return NOT_DONE_YET
                 
        
         #If no TS or TS is out of date, process NOW
-        self.process_host_count(request)
-        return NOT_DONE_YET
+        
+        return self.process_host_count(request)
         
                 
         
