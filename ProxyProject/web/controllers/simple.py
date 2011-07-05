@@ -1,10 +1,14 @@
 from twisted.web.server import NOT_DONE_YET
 from twisted.internet.defer import Deferred
 
-from web.util.smart import (Controller, Must, Can )
-from web.util.utilities import jsonify
 from json import dumps
-from data.store import Store
+
+from ProxyProject.web.util.smart import (Controller, Must, Can )
+from ProxyProject.web.util.utilities import jsonify
+from ProxyProject.data.store import Store
+
+
+
 
 
 class Simple(Controller):

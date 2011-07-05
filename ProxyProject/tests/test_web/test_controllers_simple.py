@@ -1,6 +1,6 @@
 import unittest
 from twisted.web.test.test_web import DummyRequest
-from web.controllers.simple import Simple
+from ProxyProject.web.controllers.simple import Simple
 
 class MockStore(object):
     data = {}

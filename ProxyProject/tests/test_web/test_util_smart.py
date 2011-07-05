@@ -1,6 +1,6 @@
 
 import unittest
-from web.util.smart import *
+from ProxyProject.web.util.smart import *
 from twisted.web.test.test_web import DummyRequest
 
 
