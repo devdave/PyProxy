@@ -21,11 +21,11 @@ class Observable(object):
             into a death spiral, copy the stack, then assign a new list
             instance to self.stack
         """
-        oldStack = copy.deepcopy(self.stack)
+        oldStack = self.stack[:]
         self.stack = []
         while len(oldStack):
             #@todo can't remember if Twisted...deferred handles exceptions from
             #it's handlers
-            deferred = oldstack.pop()
+            deferred = oldStack.pop()
             deferred.callback(*args, **kwargs)
         
