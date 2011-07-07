@@ -3,9 +3,9 @@ from twisted.internet.defer import Deferred
 
 from json import dumps
 
-from ProxyProject.web.util.smart import (Controller, Must, Can )
-from ProxyProject.web.util.utilities import jsonify
-from ProxyProject.data.store import Store
+from web.util.smart import (Controller, Must, Can )
+from web.util.utilities import jsonify
+from data.store import Store
 
 
 
@@ -16,11 +16,11 @@ class Simple(Controller):
     isLeaf = True
     
     @jsonify
-    def process_host_count(self, request, params):
+    def process_host_count(self, request):
         try:
             data = self.myStore.getHostCount()
         except Exception, e:
-            response = dict(success = False) 
+            response = dict(success = False, reason = e) 
         else:
             response = dict(success = True, ts = self.myStore.lastChange,  hosts = data)
 
@@ -69,7 +69,8 @@ class Simple(Controller):
     @jsonify    
     def do_describe(self, request):
         host = request.args.get('host', [""])[0]
-        return self.myStore.data.get(host, None)        
+        uris = self.myStore.data.get(host, None)        
+        return dict(success = True, host = host, uris = uris, ts = self.myStore.lastChange )   
     
     @jsonify    
     def do_digest(self, request):
