@@ -1,4 +1,4 @@
-from collections import (defaultdict, namedtuple)
+from collections import (defaultdict)
 from time import time
 
 from twisted.internet import defer
@@ -14,16 +14,21 @@ class Store(Singleton):
     """
     
     def __init__(self):
-        self.lastChange = None
+        self.lastChange = time()
         self.data = dict()
         self.hostCount = defaultdict(int)
         self.onChange = Observable()
         
+        self.addChangeObserver()
+        
+    def addChangeObserver(self):
+        d = defer.Deferred()
+        d.addCallback(self.doOnChange)
+        self.onChange.observe( d )
+        
     def doOnChange(self, *args, **kwargs):
         self.lastChange = time()
-        d = defer()
-        d.addCallback(self.workOnChange)
-        self.onChange.observe( d )
+        self.addChangeObserver()
     
         
     def addRequest(self, host, method = "UNK", uri = "/", headers = {}, ext = None):
@@ -50,11 +55,13 @@ class Store(Singleton):
             
         
     
-    def ClearHost(cls, host):
+    def clearHost(self, host):
         if host in self.data:
             del self.data[host]
+        if host in self.hostCount:
+            del self.hostCount[host]            
         self.onChange.emit(True)
-        return true
+        return True
     
     def getHostCount(self):
         data = []
