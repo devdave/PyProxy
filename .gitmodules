@@ -1,3 +1,3 @@
 [submodule "PyProxy.wiki"]
 	path = PyProxy.wiki
-	url = git@github.com:devdave/PyProxy.wiki.git
+	url = ./PyProxy.wiki/
