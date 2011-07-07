@@ -5,10 +5,10 @@ from twisted.python import log
 import sys
 log.startLogging(sys.stdout)
 
-
-from weblib.site import GetSite
-from myproxy import ProxyFactory
-from middleman import Store
+#Pun wasn't intended
+from web.site import GetSite
+from proxy.proxy import ProxyFactory
+#from data.store import Store
 
 from os.path import (dirname, abspath, join)
 from config import Config

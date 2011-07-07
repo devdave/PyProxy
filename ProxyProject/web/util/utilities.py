@@ -1,3 +1,5 @@
+from twisted.web.server import NOT_DONE_YET
+
 from functools import wraps
 from json import dumps
 
@@ -9,10 +11,13 @@ def jsonify(f):
         except Exception, e:
             return dict(success=False, message = "%s" % e )
         else:
-            try:
-                return dumps(response)
-            except Exception, e:
-                return dict(success=False, message = "%s" % e )
+            if response == NOT_DONE_YET:
+                return response
+            else:
+                try:
+                    return dumps(response)
+                except Exception, e:
+                    return dict(success=False, message = "%s" % e )
         
     
     return wrapper
