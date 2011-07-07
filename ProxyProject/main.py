@@ -8,7 +8,7 @@ log.startLogging(sys.stdout)
 #Pun wasn't intended
 from web.site import GetSite
 from proxy.proxy import ProxyFactory
-from data.store import Store
+#from data.store import Store
 
 from os.path import (dirname, abspath, join)
 from config import Config
