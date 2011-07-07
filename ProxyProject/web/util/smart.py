@@ -1,7 +1,8 @@
 
 
 from functools import wraps
-from twisted.web import (server, resource, static,  html )
+from twisted.web import (server, resource )
+from twisted.web.server import Request
 
 class RequestTypes:
     POST = 1<<1
@@ -93,11 +94,17 @@ class Can(Must):
 
         
         @wraps(host)
-        def wrapper(request, params = {}):
-            params, missing, badCast = self.parseRequestArgs(request, params)
-            success = True
-            return dumps(dict(success = success, reason = reason))
+        def wrapper(*args, **kwargs):
+            request = None
+            for arg in args:
+                if isinstance(arg, Request):
+                    request = arg
+                    break
+            else:
+                raise InvalidArgument("Missing Request object for wrapped action method call")                
                 
+            params, missing, badCast = self.parseRequestArgs(request, {})
+            return host(*args, params = params)                            
         
         return wrapper
     
