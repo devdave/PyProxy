@@ -3,15 +3,12 @@ from time import time
 
 from twisted.internet import defer
 
-from util.singleton import Singleton
+#from util.singleton import Singleton
 from util.observable import Observable
+from data.record import Record
 
         
-class Store(Singleton):
-    """
-        Store is an abomination of all that is holy in sane software development
-        BUT, it works and is a heck of a lot simpler then the other idea's I had   
-    """
+class Store(object):
     
     def __init__(self):
         self.lastChange = time()
@@ -30,6 +27,10 @@ class Store(Singleton):
         self.lastChange = time()
         self.addChangeObserver()
     
+    def newRecord(self):
+        record = Record()
+        record.store = self
+        return record
         
     def addRequest(self, host, method = "UNK", uri = "/", headers = {}, ext = None):
         """

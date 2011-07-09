@@ -7,14 +7,16 @@ from os.path import (join, dirname, exists)
 from controllers.simple import Simple        
     
     
-def GetSite(Config):
+def GetSite(Config, store):
     """
         Puts it all together, building up the website
         @docRoot the base for the static file content
     """
     root = resource.Resource()
     root.putChild("", static.File(join(Config['web']['root'], "webapp", "index.html")))
-    root.putChild("simple", Simple())
+    simple = Simple()
+    simple.setStore(store)
+    root.putChild("simple", simple )
     
     for element in Config['web']['elements']:
         root.putChild(element, static.File(join(Config['web']['root'], element)))    

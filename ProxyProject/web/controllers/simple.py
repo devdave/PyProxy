@@ -11,8 +11,7 @@ from data.store import Store
 
 
 
-class Simple(Controller):
-    myStore = Store()
+class Simple(Controller):    
     isLeaf = True
     
     @jsonify

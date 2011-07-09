@@ -122,6 +122,7 @@ class Controller(resource.Resource):
     
     def __init__(self):
         resource.Resource.__init__(self)
+        self.myStore = None
     
     def render_GET(self, request):
         method = self.findRoute(request)
@@ -137,5 +138,8 @@ class Controller(resource.Resource):
             return getattr(self, "do_%s" % method)
         else:
             return None
+            
+    def setStore(self, store):
+        self.myStore = store
         
     

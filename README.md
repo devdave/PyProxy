@@ -16,9 +16,9 @@ Secondary goals
 --------------
 
 Since the Proxy is already recording everything, additional features would be the ability to replay the response side
-of requestes on demand ( basically caching the respons ).
+of requestes on demand ( basically caching the respons ) or repeat requests back to the server.
 
-The ability to mechanize scripts into "story" scripts, to make it easier to re-use and organize them for building up
+The ability to mechanize scripts into "story" files, to make it easier to re-use and organize them for building up
 front loaded system under-test scripts.
 
 

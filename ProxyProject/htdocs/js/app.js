@@ -4,42 +4,6 @@
     */
     var lib = {};
     
-    lib.HostDetail = function(parent, menu, host, remote_url, jQuery){
-        var self = this;
-        self.parent = parent;
-        self.menu  = menu;
-        self.host = host;
-        self.clean_host = host.replace(".", "_");
-        self.remote_url = remote_url;
-        self.element_id = "tabpanel-" + self.clean_host;
-        
-        if(jQuery(self.element_id).length == 0){
-            self.page = jQuery("<div></div>").attr("id", self.element_id).data("handler", self).hide();        
-        }else{
-            self.page = jQuery(self.element_id); 
-        }
-        self.menu
-        var priv = {
-            fetchHostdetail : function(){
-                jQuery.ajax(self.remote_url)
-                    
-                    .success(function(){
-                        
-                        self.menu.append(self.page);
-                        self.menu.tabs("add", "#" + self.page.attr("id"), self.host );
-                        self.page.show()
-                    })
-                    .failure(function(){
-                        console.error("Failed to detail " , arguments);
-                    })
-                
-            }
-        }
-        
-        priv.fetchHostdetail();
-        
-    }
-    
     lib.Main = function(parent, box, jQuery){
         var self = this;
         this.pollSwitch = box.find("#pollOn");        
@@ -82,7 +46,7 @@
         
         this.onHostClick = function(){
             var hostName = $(this).data("host");
-            new lib.HostDetail(self, parent.menu, hostName, "/simple/describe?host=" + hostName, jQuery);
+            lib.RequestDetail(self, parent.menu, hostName, "/simple/describe?host=" + hostName, jQuery);
         }
         
         this.pollSwitch.change(function(){
