@@ -12,7 +12,7 @@ class Store(object):
     
     def __init__(self):
         self.lastChange = time()
-        self.data = dict()
+        self.data = defaultdict( lambda : defaultdict(list) )
         self.hostCount = defaultdict(int)
         self.onChange = Observable()
         
@@ -27,12 +27,8 @@ class Store(object):
         self.lastChange = time()
         self.addChangeObserver()
     
-    def newRecord(self):
-        record = Record()
-        record.store = self
-        return record
         
-    def addRequest(self, host, method = "UNK", uri = "/", headers = {}, ext = None):
+    def addRecord(self, record):
         """
             host - A non-empty string that is the FQDN of a web host
             method - Should be POST or GET, but can also be PUT, DELETE, or CONNECT
@@ -40,15 +36,10 @@ class Store(object):
             headers - a dictionary of the requests headers
             ext - Preferablly a dictionary of GET or POST arguments
         """
-        self.hostCount[host] += 1
-        if host not in self.data:
-            self.data[host] = dict()
-        
-        if uri not in self.data[host]:
-            self.data[host][uri] = []
-        
+        self.hostCount[record.host] += 1
+                
         #Can't believe this works :0
-        self.data[host][uri].append( dict(host = host, uri = uri, method = method, headers = headers, ext = ext))
+        self.data[record.host][record.uri].append( record.raw() )
         
         #Tell anything who cares that things have changed
         self.onChange.emit(True)    
@@ -70,5 +61,7 @@ class Store(object):
             data.append(dict(host = name, count = value ))
         return data
         
-    def getURISByHost(self, host):
-        raise Exception("Todo")
+    def getURISByHost(self, host):                
+        uris    = self.data[host].keys()
+        return dict(host = host, uris = uris, ts = self.lastChange )
+        

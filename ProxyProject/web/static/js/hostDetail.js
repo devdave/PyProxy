@@ -1,7 +1,7 @@
     
     lib._existsDetails = {};
     
-    lib.RequestDetail = function(parent, menu, host, url, jQuery){
+    lib.RequestHostDetail = function(parent, menu, host, url, jQuery){
         if( typeof lib._existsDetails[host] == "undefined"){
             lib._existsDetails[host] = new lib.HostDetail(parent, menu, host, url, jQuery);
         }
@@ -35,7 +35,7 @@
                             self.loaded = true;
                         }
                         if(data.success == false){
-                            self.page.html("<p>Error loading details" + data.reason + "</p>");
+                            self.page.html("<p>Error loading details " + data.reason + " </p>");
                         }else{
                             self.renderData(data);
                         }
@@ -43,7 +43,7 @@
                         self.page.show()
                     })
                     .error(function(){
-                        console.error("Failed to detail " , arguments);
+                        console.error("Failed to fetcg detail " , arguments);
                     });
                 
         }
@@ -51,11 +51,13 @@
         self.renderData = function(data){
             self.page.empty();
             self.page.append("<h1>").text(data.host + - + data.ts);
-            for( var uri in data.uris){
-                var responses = data.uris[uri]
+            for( var i = 0; i < data.uris.length; i++){
+            
+                
                 var body = jQuery("<div>");
                 var list = jQuery("<ul>");
-                list.append("<li>").text( data.host + "/ `" + uri + "` * " + responses.length)
+                var element = jQuery("<a>", {href:"#"}).text( data.host + data.uris[i] ).addClass("uriDetail").data('host', data.host).data("uri", data.uris[i] );
+                list.append(jQuery("<li>").append(element)); 
                 
                 body.append(list)
                 self.page.append(body);
@@ -66,32 +68,13 @@
         }
         
         self.uriTemplate = "";
+        jQuery("a.uriDetail").live("click",function(evt){
+           var element = jQuery(this);
+           var host = element.data("host");
+           var uri = element.data("uri");
+           
+        });
         
     }
     
 
-    
-//    {
-//   "host":"ominian.net",
-//   "ts":1310014998.826,
-//   "success":true,
-//   "uris":{
-//      "/":[
-//         {
-//            "headers":{
-//               "accept-charset":"ISO-8859-1,utf-8;q=0.7,*;q=0.7",
-//               "host":"ominian.net",
-//               "accept-language":"en-us,en;q=0.5",
-//               "accept-encoding":"gzip, deflate",
-//               "connection":"close",
-//               "accept":"text/html,application/xhtml+xml,application/xml;q=0.9,* /*;q=0.8",
-//               "user-agent":"Mozilla/5.0 (Windows NT 6.1; WOW64; rv:5.0) Gecko/20100101 Firefox/5.0"
-//            },
-//            "host":"ominian.net",
-//            "uri":"/",
-//            "ext":"",
-//            "method":"GET"
-//         }
-//      ]
-//   }
-//}

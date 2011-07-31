@@ -25,7 +25,7 @@
                 priv.pollHandle = $.ajax("/simple/host_count", {dataType: "json", data: {"ts": priv.storeTS } } )
                     .success(function(response){
                         if(response.success){
-                            priv.ts = response.ts;
+                            priv.storeTS = response.ts;
                             self.tbody.empty();                            
                             for(i = 0; i < response.hosts.length; i++){
                                 self.tbody.append(self.tmpl(response.hosts[i]));
@@ -46,7 +46,7 @@
         
         this.onHostClick = function(){
             var hostName = $(this).data("host");
-            lib.RequestDetail(self, parent.menu, hostName, "/simple/describe?host=" + hostName, jQuery);
+            lib.RequestHostDetail(self, parent.menu, hostName, "/simple/describe?host=" + hostName, jQuery);
         }
         
         this.pollSwitch.change(function(){

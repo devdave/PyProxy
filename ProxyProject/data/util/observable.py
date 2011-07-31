@@ -8,7 +8,7 @@ class Observable(object):
         and then the deferred is popped out, making it the
         responsibility of the deferred's origin to reapply
     """
-    
+     
     def __init__(self):
         self.stack = []
     

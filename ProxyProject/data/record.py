@@ -9,33 +9,22 @@ class Record(object):
 
 
         
-    def __init__(self):
-        self.store = None
-        self.request = dict(host = None, method = None, uri = None, header = None, args = None)
-       
+    def __init__(self, client):        
+        self.request = dict(host = client.headers.get("host", "Runtime error!"), method = client.command, uri = client.rest, headers = client.headers, data = client.data)
         #response
-        self.response = dict(header = defaultdict(list), status = "-1", body = StringIO() )
+        self.response = dict(headers = defaultdict(list), status = "-1", body = StringIO() )
         
-    @property
-    def host(self):
-        self.request.get("host", None)
-    
-    @host.setter
-    def host(self, value):
-        self.request['host'] = value
-    
-    @property
-    def uri(self):
-    
-    def addResponseHeader(name, value):
-        self.response_headers[name].append(value)
+    def addResponseHeader(self, name, value):
+        self.response['headers'][name].append(value)
         
-    def setResponseHeader(name, value):
-        self.response_headers[name] = value
+    def setResponseHeader(self, name, value):
+        self.response['headers'][name] = value        
         
     def writeResponse(self, raw):
-        self.response_body.write(raw)
+        self.response['body'].write(raw)        
         
-    def setStatus(self, status):
-        self.response_status = status
+    def setStatus(self, code, message):
+        self.response['status'] = dict(code = code, message = message )
         
+    def raw(self):
+        return dict(response = self.response, request = self.request )

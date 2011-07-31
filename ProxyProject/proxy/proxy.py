@@ -1,7 +1,8 @@
 from twisted.web import proxy, http
 from twisted.python.rebuild import Sensitive
 
-#from data.store import Store
+from data.record import Record
+import data.bus
 
 class MyProxyClient(proxy.ProxyClient):
     
@@ -9,14 +10,44 @@ class MyProxyClient(proxy.ProxyClient):
         proxy.ProxyClient.__init__(self, command, rest, version, headers, data, father)
         # @todo I can use a setter as I depend on grabbing request @ instantiation
         # but the journey below seems fragile
-        self.pxRecord = father.channel.factory.myStore.newRecord()
-        self.pxRecord.host = header['host']
-        self.pxRecord.uri = rest
-        self.pxRecord.method = command
-        self.pxRecord.
-        self.myStore.addRequest(headers['host'], command, rest, headers, data)
+        self.pxRecord = Record(self)
         
-
+    
+    def handleStatus(self, version, code, message):
+        proxy.ProxyClient.handleStatus(self,version,code, message)        
+        self.pxRecord.setStatus(code, message)
+    
+    def handleHeader(self, key, value):
+        # t.web.server.Request sets default values for these headers in its
+        # 'process' method. When these headers are received from the remote
+        # server, they ought to override the defaults, rather than append to
+        # them.
+        if key.lower() in ['server', 'date', 'content-type']:
+            self.father.responseHeaders.setRawHeaders(key, [value])
+            self.pxRecord.setResponseHeader(key, value)
+        else:
+            self.father.responseHeaders.addRawHeader(key, value)
+            self.pxRecord.addResponseHeader(key, value)
+            
+    def handleResponsePart(self, buffer):
+        proxy.ProxyClient.handleResponsePart(self, buffer)        
+        self.pxRecord.writeResponse(buffer)
+    
+    def handleResponseEnd(self):
+        """
+            Haven't traced it out yet but ocassionally father is missing channel or
+            factory... which shouldn't be possible?
+        """
+        data.bus.first("data.store.addRecord", self.pxRecord )
+        
+        if not self._finished:
+            self._finished = True
+            self.father.finish()
+            self.transport.loseConnection()
+        
+    
+        
+    
  
 class MyProxyClientFactory(proxy.ProxyClientFactory):
     protocol = MyProxyClient
@@ -32,9 +63,4 @@ class MyProxy(proxy.Proxy):
 class ProxyFactory(http.HTTPFactory):
     protocol = MyProxy
     
-    def __init__(self, *args, **kwargs):
-        self.myStore = None
-        http.HTTPFactory.__init__(self, *args, **kwargs)
-        
-    def setStore(self, store):
-        self.myStore = store
+    
