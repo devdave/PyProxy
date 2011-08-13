@@ -52,7 +52,7 @@ def first(name, default = lambda : False):
         :name str A reasonably coherent name for a callback channel
         :default To avoid exceptions and provided a fallback handler
     """    
-    return channels.get(name, default)
+    return channels.get(name, [default])[0]
     
 def all(name):
     """

@@ -16,12 +16,10 @@ class Store(object):
         self.hostCount = defaultdict(int)
         self.onChange = Observable()
         
-        self.addChangeObserver()
         
     def addChangeObserver(self):
-        d = defer.Deferred()
-        d.addCallback(self.doOnChange)
-        self.onChange.observe( d )
+        self.onChange(self.doOnChange)
+        
         
     def doOnChange(self, *args, **kwargs):
         self.lastChange = time()
@@ -36,17 +34,16 @@ class Store(object):
             headers - a dictionary of the requests headers
             ext - Preferablly a dictionary of GET or POST arguments
         """
-        self.hostCount[record.host] += 1
+        host = record.request['host']
+        self.hostCount[host] += 1
                 
         #Can't believe this works :0
-        self.data[record.host][record.uri].append( record.raw() )
+        self.data[host][record.request['uri']].append( record )
         
         #Tell anything who cares that things have changed
         self.onChange.emit(True)    
             
-            
-        
-    
+             
     def clearHost(self, host):
         if host in self.data:
             del self.data[host]
@@ -64,4 +61,7 @@ class Store(object):
     def getURISByHost(self, host):                
         uris    = self.data[host].keys()
         return dict(host = host, uris = uris, ts = self.lastChange )
+        
+    def getTRXByHostURI(self, host, uri):
+        return self.data[host][uri]
         

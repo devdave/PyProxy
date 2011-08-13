@@ -1,97 +1,104 @@
 
-    /**
-    * Base namespace for classes, utilities, and stuff
-    */
-    var lib = {};
-    
-    lib.Main = function(parent, box, jQuery){
-        var self = this;
-        this.pollSwitch = box.find("#pollOn");        
-        this.tbody = box.find("tbody");
-        
-        //@todo find a better way
-        this.tmpl = tmpl("main_hostCountRow");
-        var priv = {
-            pollHandle: null
-            , pollON: true
-            , isPolling: false
-            , storeTS: 0
-            , pollHosts: function(){
-                if(priv.isPolling){
-                    return;
-                }
-                priv.isPolling = true;
-                
-                priv.pollHandle = $.ajax("/simple/host_count", {dataType: "json", data: {"ts": priv.storeTS } } )
-                    .success(function(response){
-                        if(response.success){
-                            priv.storeTS = response.ts;
-                            self.tbody.empty();                            
-                            for(i = 0; i < response.hosts.length; i++){
-                                self.tbody.append(self.tmpl(response.hosts[i]));
-                            }
-                        }
-                    })
-                    .complete(function(response){
-                        priv.isPolling = false;                        
-                        priv.pollHandle = null;
-                        if(priv.pollON){
-                            setTimeout(priv.pollHosts, 3000);                        
-                        }
-                        
-                    });
-            }
-        }
-        
-        
-        this.onHostClick = function(){
-            var hostName = $(this).data("host");
-            lib.RequestHostDetail(self, parent.menu, hostName, "/simple/describe?host=" + hostName, jQuery);
-        }
-        
-        this.pollSwitch.change(function(){
-            if(this.checked == false){
-                priv.pollON = false;
-                priv.isPolling = false;
-                if(priv.pollHandle){                    
-                    priv.pollHandle.abort();
-                }
-            }else{
-                priv.pollON = true;
-                priv.pollHosts();
-            }
-        });
-        
-        jQuery("a.hostClick").live("click", this.onHostClick);
-        
-        priv.pollHosts();
-        
+
+App_initialize = function(config){
+    if(typeof App != "undefined"){
+        //Prevent more then one instance of Application to be defined
+        return App;
+    }
+    if(this == window){
+        return new App_initialize(config);
     }
     
+    //Claim namespaces
+    window.App = this;
+    window.Lib = {};
+    
+    App.nothing = function(){};
+    
+    //Default config
+    App.config = {}
+    jQuery.extend(App.config, config);
+    
+    App.LoadedScripts = [];
+    
+    
+    $.each(document.getElementsByTagName("script"), function(element){
+        if(this.src.length > 0){
+            
+            App.LoadedScripts.push(this.src.replace(document.location.origin, ""));
+        }
+    });
+    
+    
+    return App;
+    
+}
 
-    /**
-    *@class lib.App The central god module for the console
-    *@param object jQuery a Valid jQuery instance
-    *@param a valid jQuery managed refernce to the Main html panel div/span/thing    
-    */
-    lib.App = function(jQuery, main, menu){
-            var self = this;
-            this.menu = menu;
-            this.menu.tabs();
-            try{
-                this.main = new lib.Main(self, main, jQuery)
-            }catch(e){
-                console.error(e);
+App_initialize.prototype.loadScript = function(name, options){
+        var config = { 
+            path: "/js/"            
+        }
+    
+        $.extend(config, options);
+        var defer = jQuery.Deferred();
+        var pathname = config['path'] + name
+        
+        var callback = function(response){
+                console.log("Loaded ", pathname)
+                if(defer.isResolved() == false){
+                    App.LoadedScripts.push(pathname);
+                
+                    try{
+                        defer.resolve(response, arguments);
+                    }
+                    catch(e){
+                        console.error("loadScript() ", name , " ) Failed defer.resolve with ", arguments, e)
+                    }
+                
+                }
+                
+            
+        }
+        
+        
+        var microsoftsucks = function(){
+            if( this.readyState == "complete"){
+                alert("You are using a shitty browser, this message will repeat for every required workaround");
+                callback();
+            }
+        }
+        
+        
+        
+        if(App.LoadedScripts.indexOf(pathname) < 0 ){
+            console.log("Loading ", pathname);
+            var scriptElement = document.createElement("script")
+            scriptElement.src = pathname;
+            if(typeof scriptElement.onload != "undefined"){
+                scriptElement.onload = callback;
+            }
+            else if(typeof scriptElement.onreadystatechange != "undefined") {
+                alert("You are using a shitty browser, this message will repeat for every required workaround");
+                scriptElement.onreadystatechange = microsoftsucks;
+            }
+            else{
+                alert("I have no idea what web browser you're using; use chrome, firefox, or worst case MSIE ");
             }
             
+            document.getElementsByTagName("head")[0].appendChild(scriptElement);
             
-            this.templates = {};
-            
-            
-            this.setTemplate = function(name, id){
-                self.templates[name] = tmpl(id);
-            };
-            
-            
-            
-        };
+        }else{
+            //We're already done, call defer on context shift
+            setTimeout(function(){
+                defer.resolve(true);
+            }, 1)
+        }
+        
+        return defer;
+    }
+
+
+
+
+
+

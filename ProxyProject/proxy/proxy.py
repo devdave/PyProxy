@@ -7,6 +7,12 @@ import data.bus
 class MyProxyClient(proxy.ProxyClient):
     
     def __init__(self, command, rest, version, headers, data, father):
+        if "proxy-connection" in headers:
+            del headers["proxy-connection"]
+        
+        headers["connection"] = "close"
+        headers.pop('keep-alive', None)
+        
         proxy.ProxyClient.__init__(self, command, rest, version, headers, data, father)
         # @todo I can use a setter as I depend on grabbing request @ instantiation
         # but the journey below seems fragile
@@ -38,7 +44,7 @@ class MyProxyClient(proxy.ProxyClient):
             Haven't traced it out yet but ocassionally father is missing channel or
             factory... which shouldn't be possible?
         """
-        data.bus.first("data.store.addRecord", self.pxRecord )
+        data.bus.first("data.store.addRecord" )(self.pxRecord)
         
         if not self._finished:
             self._finished = True
