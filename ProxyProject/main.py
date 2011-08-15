@@ -2,6 +2,7 @@
 
 from twisted.internet import reactor
 from twisted.python import log
+from twisted.web.server import NOT_DONE_YET
 import sys
 log.startLogging(sys.stdout)
 

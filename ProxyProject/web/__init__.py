@@ -6,6 +6,7 @@ from txweb import Site
 #app
 from root import Root
 
+
 from modulereloader import ModuleReloader
 
 
@@ -15,8 +16,7 @@ class Oversite(Site):
         self.store = store
         
     def prefilter(self, request, resource):
-        request.store = self.store
-        
+        request.store = self.store        
         
         
 

@@ -1,3 +1,4 @@
+
 <table>
                 <thead>
                     <tr>
@@ -16,5 +17,6 @@
             </table>
             
 <script>
-    alert("Hello?");
+    //Ghetto as all hell
+    ts = ${ts}
 </script>

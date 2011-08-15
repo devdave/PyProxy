@@ -17,10 +17,11 @@
         <script src="/js/tmpl.js" /></script>
         <script src="/js/app.js" /></script>
         <script>
+        var ts = 0;
         var delay = 1500;
         var reloader = function(){
             
-                $("#menu").load("/hosts/list", function(){
+                $("#menu").load("/hosts/list", { "ts" : ts }, function(){
                     if($("#polling").val() != "on"){
                         reloader.running = false;
                         return;

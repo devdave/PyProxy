@@ -9,9 +9,7 @@ from os.path import exists
 makoLookup = mako.lookup.TemplateLookup(directories = [ static.relPath(".") ], module_directory = cache.MAKO_C, output_encoding="ascii" )
 
 
-
 def byMako(path, **kwargs):
-    
     
     if not path.endswith(".mako"):
         path += '.mako'
@@ -27,8 +25,6 @@ class asMako(object):
         """
             Decorator to wrap an action, expects action to output a dictionary with
             requisite view parameters.
-            
-            
         """
         self.path = path
         
@@ -40,9 +36,6 @@ class asMako(object):
             response = func(*args, **kwargs)
             return byMako(self.path).render(**response)
             
-            
-                    
-                
         return decorator
             
         

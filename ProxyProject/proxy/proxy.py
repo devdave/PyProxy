@@ -1,8 +1,12 @@
 from twisted.web import proxy, http
 from twisted.python.rebuild import Sensitive
 
+import urlparse
+
 from data.record import Record
 import data.bus
+
+
 
 class MyProxyClient(proxy.ProxyClient):
     
@@ -12,7 +16,7 @@ class MyProxyClient(proxy.ProxyClient):
         
         headers["connection"] = "close"
         headers.pop('keep-alive', None)
-        
+                
         proxy.ProxyClient.__init__(self, command, rest, version, headers, data, father)
         # @todo I can use a setter as I depend on grabbing request @ instantiation
         # but the journey below seems fragile
@@ -51,15 +55,37 @@ class MyProxyClient(proxy.ProxyClient):
             self.father.finish()
             self.transport.loseConnection()
         
-    
-        
-    
- 
 class MyProxyClientFactory(proxy.ProxyClientFactory):
     protocol = MyProxyClient
 
 class MyProxyRequest(proxy.ProxyRequest):
     protocols = {'http': MyProxyClientFactory}
+    
+    def process(self):
+        parsed = urlparse.urlparse(self.uri)
+        protocol = parsed[0]
+        host = parsed[1]
+        port = self.ports[protocol]
+        if ':' in host:
+            host, port = host.split(':')
+            port = int(port)
+        rest = urlparse.urlunparse(('', '') + parsed[2:])
+        if not rest:
+            rest = rest + '/'
+        class_ = self.protocols[protocol]
+        headers = self.getAllHeaders().copy()
+        if 'host' not in headers:
+            headers['host'] = host
+        self.content.seek(0, 0)
+        s = self.content.read()
+        
+        clientFactory = class_(self.method, rest, self.clientproto, headers,
+                               s, self)
+        
+        if host == "test.foo":
+            host = "direct.dev"
+            
+        self.reactor.connectTCP(host, port, clientFactory)    
     
  
 class MyProxy(proxy.Proxy):
