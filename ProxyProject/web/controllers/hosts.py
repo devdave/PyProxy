@@ -1,24 +1,16 @@
 
-from contextlib import contextmanager
 
-from twisted.python.rebuild import Sensitive
-from twisted.web.server import NOT_DONE_YET
-from txweb.util import expose
-from ProxyProject.web import render
+from ProxyProject import data
 
 from urllib import unquote_plus
 
-@contextmanager
-def getSessionData(request):
-    session = request.getSession()
-    if not hasattr(session, "data"):
-        session.data = {}
-    data = session.data
-    yield data
-    session.data = data
+from base import *
+
+#todo add 2 base
+from mako import exceptions
     
 
-class Hosts(object, Sensitive):
+class Hosts(Base):
 
     store = None
     @expose
@@ -29,22 +21,31 @@ class Hosts(object, Sensitive):
     def list(self, request):
         #todo push the must and can helpers to txWeb
         ts = int(float(request.args.get('ts', [0])[0]))
-        with getSessionData(request) as data:
+        with self.getSessionData(request) as session:
             #be interesting to see how the context manager handles the inner method here
             
             
-            def response(*args):                
-                hosts = request.site.store.getHostCount()
-                view = render.byMako("hosts/list")
-                
-                
+            def response(*args):
+                view = {}
+                view['hosts'] = request.site.store.getHostCount()                
+                view['list_actions'] = {}
+                view['page_actions'] = {}
+                view['ts'] = request.site.store.lastChange
+                data.bus.call("web.hosts.list", self, view)
+                template = render.byMako("hosts/list")
                 try:
-                    request.write( view.render(hosts = hosts, ts = request.site.store.lastChange ) )
-                    request.finish()    
+                    request.write( template.render(**view) )
+                    
                 except Exception, e :
+                    request.write( exceptions.html_error_template().render() )
+                    
+                try:
+                    request.finish()
+                except Exception, e:
                     #NEed to find a better way of figuring out if the client timed out
                     #request.finished doesn't seem to be reliable
                     pass
+                    
             
             #round off the microseconds
             if ts >= int(request.site.store.lastChange):
@@ -64,13 +65,17 @@ class Hosts(object, Sensitive):
         postpath = request.postpath
         domain = request.postpath[0]
         uri    = unquote_plus(request.postpath[1])
-        records = request.site.store.getTRXByHostURI(domain, uri)
-        data = dict(uris = records)
-        data['args'] = request.args
-        data['post'] = postpath
-        data['host'] = domain
-        data['path'] = uri
-        return data
+        records = request.site.store.getTRXByHostURI(domain, uri)        
+        view = {}
+        view['uris'] = records
+        view['args'] = request.args
+        view['post'] = postpath
+        view['host'] = domain
+        view['path'] = uri
+        view['uri_actions'] = {}
+        view['page_actions'] = {}
+        data.bus.call("web.hosts.uri", self, view)
+        return view
         
     @expose
     @render.asMako("hosts/sessions")
@@ -78,6 +83,49 @@ class Hosts(object, Sensitive):
         if len(request.postpath) <= 0:
             return "Missing host name in URL"
         
+        
+            
         host = request.postpath[-1]
-        data = request.site.store.getURISByHost(host)
-        return data
+        payload = request.site.store.getURISByHost(host)
+        
+        def getContentTypes(uri):
+        #relocate into view
+            mapper = lambda record : record.response['headers']['Content-Type']
+            unique = set()
+            allTypes = request.site.store.map2uri( host,uri, mapper )
+            unique.update( allTypes )
+            return [x for x in unique]
+        
+        view = {}
+        view.update(payload)        
+        view['getContentTypes'] = getContentTypes
+        view['store'] = request.site.store
+        
+        #Additional bindings for plugins
+        view['session_actions'] = {}
+        view['page_actions'] = {}
+        data.bus.call("web.hosts.sessions", self, view)
+        return view
+
+    @expose
+    @render.asMako("hosts/response")
+    def record(self, request):    
+        view = {}
+        if len(request.postpath) <= 0:            
+            view['record'] = None
+            view['error'] = "Missing record.id"
+            record = None
+        else:        
+            view['record_id'] = request.postpath[0]
+            view['record'] = request.site.store.getRecordById(view['record_id'])
+        
+        
+        if view['record'] is None:                         
+            view['body'] = view['host'] = "Bad or missing record.id"
+            view['error'] = "Unable to find requested record.body"
+        else:
+            view['body'] = record.getBody()
+            view['host'] = record.host
+        
+        
+        return view

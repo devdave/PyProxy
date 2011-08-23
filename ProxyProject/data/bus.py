@@ -53,6 +53,13 @@ def first(name, default = lambda : False):
         :default To avoid exceptions and provided a fallback handler
     """    
     return channels.get(name, [default])[0]
+
+def must(name, *args, **kwargs):
+    """
+        Will blow up with an Index or Key error if it fails, ensuring that
+        this call must work or it shall fail
+    """
+    return channels[name][0](*args, **kwargs)
     
 def all(name):
     """

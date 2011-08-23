@@ -1,0 +1,45 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <script src="/js/jquery.js" /></script>
+        <title>PyProxy Console</title>
+        <link type="text/css" href="/css/ui-lightness/jquery-ui-1.8.14.custom.css" rel="Stylesheet" />	
+    </head>
+    <body>
+        <style>
+            #result {
+                max-width: 600px;
+                overflow: auto;
+                overflow-style: marquee-line;
+                white-space: pre-line;
+            }
+        </style>
+        <textarea id="result"></textarea>
+        <br/>
+        <textarea id="console" cols="60" rows="15"></textarea>
+        <br/>
+        <input id="fire" type="button" value="exec">
+        <script>
+        
+            function process(){
+                $.get("/console/process",{ "code":$("#console").val() }, function(response, status, xhr){
+                        $("#result").val(response); 
+                    });
+            }
+            
+            $(function(){
+                $('#fire').click(function(){
+                    process()
+                    //$("#result").load(, , function(resp){ }  );
+                });
+                
+                $("#console").keydown(function(e){
+                    if ( e.which == 13 && (e.metaKey || e.altKey)){
+                        process()                        
+                    }
+                });
+            });
+        </script>
+        
+    </body>
+</html>

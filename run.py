@@ -8,18 +8,18 @@ log.startLogging(sys.stdout)
 
 
 
-from proxy.proxy import ProxyFactory
+from ProxyProject.proxy.proxy import ProxyFactory
 
-import data.bus
-import events
-import web
-import data
-
+from ProxyProject import data
+from ProxyProject import events
+from ProxyProject import web
+from ProxyProject import data
+from ProxyProject.config import Config
 
 
 
 from os.path import (dirname, abspath, join)
-from config import Config
+
 
 from twisted.internet.task import LoopingCall
 

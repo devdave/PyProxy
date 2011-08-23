@@ -12,18 +12,17 @@ from cgi import escape
 
 from contextlib import contextmanager
 
-
+from ProxyProject import data
 from controllers.hosts import Hosts
-        
+from controllers.console import Console    
 
 
 class Root(object, Sensitive):
     
     store = None
     
-    def __init__(self, store):
-        self.store = store
-        self.hosts.store = store
+    def __init__(self, store):        
+        data.bus.call("root.init", self)
     
     index = File(ROOT)
     css = File(CSS)
@@ -32,4 +31,4 @@ class Root(object, Sensitive):
     
     hosts = Hosts()
     
-    
+    console = Console()

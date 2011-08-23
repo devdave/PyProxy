@@ -6,14 +6,16 @@ from txweb import Site
 #app
 from root import Root
 
+from ProxyProject import data
 
-from modulereloader import ModuleReloader
+
+from ProxyProject.modulereloader import ModuleReloader
 
 
 class Oversite(Site):
     def __init__(self, store, *args, **kwargs):
         Site.__init__(self, *args, **kwargs)
-        self.store = store
+        self.store = data.bus.must("data.store")
         
     def prefilter(self, request, resource):
         request.store = self.store        

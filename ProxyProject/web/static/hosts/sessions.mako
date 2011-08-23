@@ -3,10 +3,19 @@
 </span>
 <h2>Session digest for ${host}</h2>
 
-<div>
-    <ul>
-    % for uri in uris:
-    <li><a href="/hosts/uri/${host}/${uri|u}/">${uri}</a></li>
-    % endfor
-    </ul>
-</div>
+<table>
+    <thead>    
+        <tr>
+            <th>URI</th>
+            <th>Type</th>
+        </tr>
+    </thead>
+    <tbody>
+% for uri in uris:
+        <tr>
+            <td><a href="/hosts/uri/${host}/${uri|u}/">${uri}</a></td>
+            <td>${getContentTypes(uri)}</td>
+        </tr>
+% endfor
+    </tbody>
+</table>
